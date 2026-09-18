@@ -20,9 +20,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
-    const amountMatch = text.match(/([\d,]+)원/);
+    // 1. 금액 정규식 추출 (숫자 + 원 조합 추출)
+    const amountMatch = text.match(/([\d,]+)\s*원/);
     const amount = amountMatch ? parseInt(amountMatch[1].replace(/,/g, ''), 10) : 0;
-    const store = text.length > 50 ? text.substring(0, 50) + '...' : text;
+
+    // 2. 가맹점/내용 정리 (줄바꿈 문자를 띄어쓰기로 정돈)
+    const cleanedText = text.replace(/\n+/g, ' ').trim();
+    const store = cleanedText.length > 100 ? cleanedText.substring(0, 100) + '...' : cleanedText;
 
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
